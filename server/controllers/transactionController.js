@@ -1,40 +1,43 @@
 const Transaction = require('../models/Transaction');
 
 // יצירת טרנזקציה חדשה - מקבל את הנתונים מה-body ושומר במסד
-const createTransaction = async (req, res) => {
+const createTransaction = async (req, res, next) => {
     try {
         const transaction = await Transaction.create(req.body);
         res.status(201).json(transaction);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        error.statusCode = 400; // שגיאת ולידציה של Mongoose - קלט לא תקין
+        next(error);
     }
 };
 
 // שליפת כל הטרנזקציות שקיימות באוסף
-const getAllTransactions = async (req, res) => {
+const getAllTransactions = async (req, res, next) => {
     try {
         const transactions = await Transaction.find();
         res.status(200).json(transactions);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 };
 
 // שליפת טרנזקציה בודדת לפי ה-id שמגיע בפרמטר של ה-URL
-const getTransactionById = async (req, res) => {
+const getTransactionById = async (req, res, next) => {
     try {
         const transaction = await Transaction.findById(req.params.id);
         if (!transaction) {
-            return res.status(404).json({ error: 'טרנזקציה לא נמצאה' });
+            const error = new Error('טרנזקציה לא נמצאה');
+            error.statusCode = 404;
+            return next(error);
         }
         res.status(200).json(transaction);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 };
 
 // עדכון טרנזקציה קיימת - new: true מחזיר את המסמך אחרי העדכון (ולא לפני)
-const updateTransaction = async (req, res) => {
+const updateTransaction = async (req, res, next) => {
     try {
         const transaction = await Transaction.findByIdAndUpdate(
             req.params.id,
@@ -42,24 +45,29 @@ const updateTransaction = async (req, res) => {
             { new: true, runValidators: true }
         );
         if (!transaction) {
-            return res.status(404).json({ error: 'טרנזקציה לא נמצאה' });
+            const error = new Error('טרנזקציה לא נמצאה');
+            error.statusCode = 404;
+            return next(error);
         }
         res.status(200).json(transaction);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        error.statusCode = 400; // שגיאת ולידציה של Mongoose - קלט לא תקין
+        next(error);
     }
 };
 
 // מחיקת טרנזקציה לפי id
-const deleteTransaction = async (req, res) => {
+const deleteTransaction = async (req, res, next) => {
     try {
         const transaction = await Transaction.findByIdAndDelete(req.params.id);
         if (!transaction) {
-            return res.status(404).json({ error: 'טרנזקציה לא נמצאה' });
+            const error = new Error('טרנזקציה לא נמצאה');
+            error.statusCode = 404;
+            return next(error);
         }
         res.status(200).json({ message: 'הטרנזקציה נמחקה בהצלחה' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 };
 

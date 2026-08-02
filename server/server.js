@@ -3,11 +3,17 @@ const cors = require('cors');
 const mongoose = require('mongoose'); 
 require('dotenv').config();
 
+const logger = require('./middleware/logger');
+const globalErrorHandler = require('./middleware/errorHandler');
+
 const app = express();
 
 // הגדרות חובה (Middleware)
 app.use(cors());
 app.use(express.json());
+
+// לוגר גלובלי - רץ על כל בקשה, לפני שהיא מגיעה ל-routes
+app.use(logger);
 
 mongoose.connect(process.env.DATABASE_URL); // מחבר לקישור שיהיה ב-.env
 
@@ -30,6 +36,9 @@ app.use('/api/transactions', transactionRoutes);
 app.get('/', (req, res) => {
     res.send('Vefinance Server is running!');
 });
+
+// error handler גלובלי - חייב להיות אחרון, אחרי כל ה-routes
+app.use(globalErrorHandler);
 
 // הפורט של השרת
 const PORT = process.env.PORT || 5000;
