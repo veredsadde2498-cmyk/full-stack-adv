@@ -19,11 +19,11 @@ db.once('open', () => {
     console.log('connected to mongo - החיבור למונגו הצליח!');
 });
 
-// ייבוא הראוטר של הפוסטים (תוסיפי את זה למעלה או לפני ה-routes)
-const postRouter = require('./routes/index');
+// ייבוא הראוטר של הטרנזקציות
+const transactionRoutes = require('./routes/transactionRoutes');
 
-// שימוש בראוטר - כל פנייה ל- localhost:5000/post תגיע לכאן
-app.use('/post', postRouter);
+// שימוש בראוטר - כל פנייה ל- localhost:5000/api/transactions תגיע לכאן
+app.use('/api/transactions', transactionRoutes);
 
 
 // נתיב בדיקה קצר בדפדפן

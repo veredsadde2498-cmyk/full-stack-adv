@@ -1,0 +1,132 @@
+{
+  "info": {
+    "_postman_id": "07a3b417-4bee-4a93-8946-85569ff89f5a",
+    "name": "Vefinance API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57074803",
+    "_collection_link": "https://go.postman.co/collection/57074803-07a3b417-4bee-4a93-8946-85569ff89f5a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "POST - Create Transaction",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"רכישת ציוד משרדי\",\r\n  \"amount\": 450,\r\n  \"type\": \"expense\",\r\n  \"category\": \"ציוד\",\r\n  \"date\": \"2026-08-01\",\r\n  \"owner\": \"64f1a2b3c4d5e6f7a8b9c0d1\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/transactions",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "transactions"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Get All Transactions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/transactions",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "transactions"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Get Transaction By Id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/transactions/6a6f50c9d2e33a8a9cd8fa37",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "transactions",
+            "6a6f50c9d2e33a8a9cd8fa37"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT - Update Transaction",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"amount\": 500,\r\n  \"category\": \"ציוד משרדי\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/transactions/6a6f50c9d2e33a8a9cd8fa37",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "transactions",
+            "6a6f50c9d2e33a8a9cd8fa37"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE - Delete Transaction",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/transactions/6a6f50c9d2e33a8a9cd8fa37",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "transactions",
+            "6a6f50c9d2e33a8a9cd8fa37"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
