@@ -1,9 +1,9 @@
 const Joi = require('joi');
 
-// תבנית של ObjectId תקין של MongoDB - 24 תווים הקסדצימליים
-const objectIdPattern = /^[0-9a-fA-F]{24}$/;
-
-// סכימת יצירה - כל השדות חובה (מלבד date שיש לו default ב-Mongoose)
+// סכימת יצירה - כל השדות חובה (מלבד date שיש לו default ב-Mongoose).
+// owner לא נמצא בסכימה בכלל - הוא לא אמור להגיע מהלקוח, אלא נלקח מ-req.user
+// ב-controller (ראו transactionController.js). אם לקוח כן ישלח owner ב-body,
+// stripUnknown:true ב-middleware/validate.js יזרוק אותו לפני שהוא מגיע לשם בכלל.
 const createTransactionSchema = Joi.object({
     title: Joi.string().min(3).max(100).required().messages({
         'string.empty': 'כותרת היא שדה חובה',
@@ -29,11 +29,6 @@ const createTransactionSchema = Joi.object({
     }),
     date: Joi.date().optional().messages({
         'date.base': 'תאריך לא תקין'
-    }),
-    owner: Joi.string().pattern(objectIdPattern).required().messages({
-        'string.pattern.base': 'owner חייב להיות מזהה תקין (ObjectId בן 24 תווים הקסדצימליים)',
-        'string.empty': 'owner הוא שדה חובה',
-        'any.required': 'owner הוא שדה חובה'
     })
 });
 

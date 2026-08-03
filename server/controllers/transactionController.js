@@ -1,9 +1,13 @@
 const Transaction = require('../models/Transaction');
 
-// יצירת טרנזקציה חדשה - מקבל את הנתונים מה-body ושומר במסד
+// יצירת טרנזקציה חדשה - owner נלקח מהמשתמש המחובר (req.user, מוזן ע"י protect),
+// לא מה-body שהלקוח שולח - אחרת לקוח יכול היה ליצור טרנזקציה בשם משתמש אחר
 const createTransaction = async (req, res, next) => {
     try {
-        const transaction = await Transaction.create(req.body);
+        const transaction = await Transaction.create({
+            ...req.body,
+            owner: req.user.id
+        });
         res.status(201).json(transaction);
     } catch (error) {
         error.statusCode = 400; // שגיאת ולידציה של Mongoose - קלט לא תקין
@@ -11,20 +15,22 @@ const createTransaction = async (req, res, next) => {
     }
 };
 
-// שליפת כל הטרנזקציות שקיימות באוסף
+// שליפת כל הטרנזקציות של המשתמש המחובר בלבד
 const getAllTransactions = async (req, res, next) => {
     try {
-        const transactions = await Transaction.find();
+        const transactions = await Transaction.find({ owner: req.user.id });
         res.status(200).json(transactions);
     } catch (error) {
         next(error);
     }
 };
 
-// שליפת טרנזקציה בודדת לפי ה-id שמגיע בפרמטר של ה-URL
+// שליפת טרנזקציה בודדת - מסננים גם לפי owner כדי שמשתמש לא יוכל לשלוף טרנזקציה
+// של מישהו אחר רק על ידי ניחוש ה-id שלה (IDOR). אם היא קיימת אבל שייכת למשתמש
+// אחר, מחזירים אותו 404 כמו במקרה שהיא לא קיימת בכלל - לא חושפים את קיומה
 const getTransactionById = async (req, res, next) => {
     try {
-        const transaction = await Transaction.findById(req.params.id);
+        const transaction = await Transaction.findOne({ _id: req.params.id, owner: req.user.id });
         if (!transaction) {
             const error = new Error('טרנזקציה לא נמצאה');
             error.statusCode = 404;
@@ -36,11 +42,13 @@ const getTransactionById = async (req, res, next) => {
     }
 };
 
-// עדכון טרנזקציה קיימת - new: true מחזיר את המסמך אחרי העדכון (ולא לפני)
+// עדכון טרנזקציה קיימת - new: true מחזיר את המסמך אחרי העדכון (ולא לפני).
+// אותו סינון owner כמו ב-getTransactionById, כדי שאי אפשר יהיה לעדכן טרנזקציה
+// של משתמש אחר
 const updateTransaction = async (req, res, next) => {
     try {
-        const transaction = await Transaction.findByIdAndUpdate(
-            req.params.id,
+        const transaction = await Transaction.findOneAndUpdate(
+            { _id: req.params.id, owner: req.user.id },
             req.body,
             { new: true, runValidators: true }
         );
@@ -56,10 +64,10 @@ const updateTransaction = async (req, res, next) => {
     }
 };
 
-// מחיקת טרנזקציה לפי id
+// מחיקת טרנזקציה - אותו סינון owner, מאותה סיבה
 const deleteTransaction = async (req, res, next) => {
     try {
-        const transaction = await Transaction.findByIdAndDelete(req.params.id);
+        const transaction = await Transaction.findOneAndDelete({ _id: req.params.id, owner: req.user.id });
         if (!transaction) {
             const error = new Error('טרנזקציה לא נמצאה');
             error.statusCode = 404;

@@ -3,6 +3,9 @@ const router = express.Router();
 const Transaction = require('../controllers/transactionController');
 const validate = require('../middleware/validate');
 const { createTransactionSchema, updateTransactionSchema } = require('../validation/transactionValidation');
+const { protect } = require('../middleware/authMiddleware');
+
+router.use(protect); // כל ה-routes של טרנזקציות דורשים משתמש מחובר
 
 router.post('/', validate(createTransactionSchema), Transaction.createTransaction);
 router.get('/', Transaction.getAllTransactions);

@@ -1,19 +1,26 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose'); 
+const helmet = require('helmet');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const logger = require('./middleware/logger');
 const globalErrorHandler = require('./middleware/errorHandler');
+const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
 // הגדרות חובה (Middleware)
+app.use(helmet()); // מגדיר HTTP headers בסיסיים להגנה (XSS, clickjacking וכו')
 app.use(cors());
 app.use(express.json());
 
 // לוגר גלובלי - רץ על כל בקשה, לפני שהיא מגיעה ל-routes
 app.use(logger);
+
+// הגבלת קצב כללית על כל ה-API - הגנה מפני עומס יתר. authLimiter הספציפי
+// והמחמיר יותר על login/register מוגדר בנפרד ב-routes/authRoutes.js
+app.use('/api', apiLimiter);
 
 mongoose.connect(process.env.DATABASE_URL); // מחבר לקישור שיהיה ב-.env
 
@@ -25,10 +32,12 @@ db.once('open', () => {
     console.log('connected to mongo - החיבור למונגו הצליח!');
 });
 
-// ייבוא הראוטר של הטרנזקציות
+// ייבוא הראוטרים
+const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 
-// שימוש בראוטר - כל פנייה ל- localhost:5000/api/transactions תגיע לכאן
+// שימוש בראוטרים - כל פנייה ל- localhost:5000/api/... תגיע לראוטר המתאים
+app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 
 
