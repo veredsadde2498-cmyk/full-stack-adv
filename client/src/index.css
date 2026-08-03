@@ -1,3 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* התשתית של Tailwind מוכנה, אבל העיצוב הקיים למטה עדיין ב-CSS רגיל בכוונה - נהפוך אותו ל-Tailwind בשלב נפרד */
+
 /* עיצוב כללי של העמוד */
 body {
   margin: 0;
