@@ -1,13 +1,18 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../services/api'
 
-// עמוד הרשמה - כרגע רק UI ומבנה, בלי חיבור אמיתי ל-API (זה יגיע בשלב הבא)
+// עמוד הרשמה - מחובר עכשיו ל-POST /api/auth/register דרך axios
 function Register() {
+  const navigate = useNavigate()
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: ''
   })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     setFormData({
@@ -16,15 +21,27 @@ function Register() {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: חיבור אמיתי ל-POST /api/auth/register בשלב הבא
-    console.log('נתוני הרשמה (placeholder):', formData)
+    setError('')
+    setLoading(true)
+
+    try {
+      // register לא מחזיר token (register לא מתחבר אוטומטית) - רק יוצר משתמש
+      await api.post('/auth/register', formData)
+      navigate('/login', { state: { message: 'ההרשמה הצליחה! כעת ניתן להתחבר.' } })
+    } catch (err) {
+      setError(err.response?.data?.message || 'אירעה שגיאה בהרשמה, נסי שוב')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="main-container" dir="rtl">
       <h2>הרשמה למערכת</h2>
+
+      {error && <p style={{ color: '#dc3545' }}>{error}</p>}
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -60,7 +77,9 @@ function Register() {
           />
         </div>
 
-        <button type="submit">הירשם</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'נרשמת...' : 'הירשם'}
+        </button>
       </form>
 
       <div style={{ marginTop: '15px' }}>
