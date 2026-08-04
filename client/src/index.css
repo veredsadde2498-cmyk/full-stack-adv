@@ -81,3 +81,107 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background-color: #0056b3;
 }
+
+/* select נראה כמו input בטופס - לא היה style ל-select עד עכשיו */
+.form-group select {
+  padding: 10px 12px;
+  font-size: 15px;
+  font-family: inherit;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.form-group select:focus {
+  border-color: #007bff;
+}
+
+/* גרסה רחבה יותר של main-container לעמוד הדשבורד - טבלה לא נוחה ב-380px */
+.dashboard-container {
+  max-width: 800px;
+  text-align: right;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.summary-cards {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  flex: 1;
+  background-color: #f4f6f9;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.summary-card p {
+  margin: 6px 0 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: 10px;
+  text-align: right;
+  border-bottom: 1px solid #eee;
+}
+
+/* כפתורי פעולה כלליים - שימוש חוזר בדשבורד ובטבלה, בלי להמיר הכל ל-Tailwind */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #b02a37;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #565e64;
+}
