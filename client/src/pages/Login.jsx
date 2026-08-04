@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { GoogleLogin } from '@react-oauth/google'
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
@@ -42,6 +43,27 @@ function Login() {
     }
   }
 
+  // הצלחה ב-Google Sign-In - שולחים את ה-credential (ID token) לשרת לאימות,
+  // ומטפלים בתשובה בדיוק כמו login רגיל (אותה פונקציית login() מ-useAuth)
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('')
+    setLoading(true)
+
+    try {
+      const response = await api.post('/auth/google', { credential: credentialResponse.credential })
+      login(response.data.user, response.data.token)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err.response?.data?.message || 'ההתחברות עם Google נכשלה, נסי שוב')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleError = () => {
+    setError('ההתחברות עם Google נכשלה, נסי שוב')
+  }
+
   return (
     <div className="main-container" dir="rtl">
       <h2>התחברות למערכת</h2>
@@ -76,6 +98,16 @@ function Login() {
           {loading ? 'מתחברת...' : 'התחבר'}
         </button>
       </form>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '18px 0', color: '#888' }}>
+        <hr style={{ flex: 1 }} />
+        <span>או</span>
+        <hr style={{ flex: 1 }} />
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
+      </div>
 
       <div style={{ marginTop: '15px' }}>
         <Link
