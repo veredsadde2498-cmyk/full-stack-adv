@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAuth } from '../context/AuthContext'
 import { fetchTransactions, deleteTransaction } from '../store/transactionsSlice'
+import MonthlyTrend from '../components/MonthlyTrend'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -18,6 +19,19 @@ function Dashboard() {
   const handleLogout = () => {
     logout()
     navigate('/login')
+  }
+
+  // ייבוא דינמי - jsPDF גורר איתו html2canvas+dompurify (~250KB) שלא נחוצים לנו
+  // בכלל (אנחנו לא משתמשים ב-doc.html()), אז לא הגיוני לטעון את זה לכל מי
+  // שנכנס לדשבורד - רק כשבאמת לוחצים על "ייצוא ל-PDF"
+  const handleExportPdf = async () => {
+    if (list.length === 0) {
+      alert('אין נתונים לייצוא - הוסיפי טרנזקציה קודם')
+      return
+    }
+
+    const { exportTransactionsToPdf } = await import('../utils/exportPdf')
+    exportTransactionsToPdf(list)
   }
 
   const handleDelete = async (id) => {
@@ -79,9 +93,16 @@ function Dashboard() {
             </div>
           </div>
 
-          <Link to="/transactions/new" className="btn btn-primary">
-            + טרנזקציה חדשה
-          </Link>
+          <MonthlyTrend transactions={list} />
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <Link to="/transactions/new" className="btn btn-primary">
+              + טרנזקציה חדשה
+            </Link>
+            <button type="button" className="btn btn-secondary" onClick={handleExportPdf}>
+              ייצוא ל-PDF
+            </button>
+          </div>
 
           {deleteError && <p style={{ color: '#dc3545', marginTop: '10px' }}>{deleteError}</p>}
 
