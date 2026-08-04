@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import api from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 // עמוד התחברות - מחובר עכשיו ל-POST /api/auth/login דרך axios
 function Login() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { login } = useAuth()
 
   // הודעת הצלחה שמגיעה מ-Register.jsx אחרי הרשמה מוצלחת (navigate עם state)
   const successMessage = location.state?.message
@@ -31,7 +33,7 @@ function Login() {
 
     try {
       const response = await api.post('/auth/login', formData)
-      localStorage.setItem('token', response.data.token)
+      login(response.data.user, response.data.token)
       navigate('/dashboard')
     } catch (err) {
       setError(err.response?.data?.message || 'אירעה שגיאה בהתחברות, נסי שוב')
