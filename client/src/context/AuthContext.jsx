@@ -42,8 +42,14 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  // מעדכנת שדות בודדים ב-user בלי login/logout מלא - למשל אחרי העלאת תמונת
+  // פרופיל, כדי שהיא תופיע מיד בדשבורד בלי לרענן את הדף
+  const updateUser = (updates) => {
+    setUser((prev) => (prev ? { ...prev, ...updates } : prev))
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

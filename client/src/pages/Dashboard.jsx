@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useAuth } from '../context/AuthContext'
 import { fetchTransactions, deleteTransaction } from '../store/transactionsSlice'
 import MonthlyTrend from '../components/MonthlyTrend'
+import AvatarUpload from '../components/AvatarUpload'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -59,7 +60,10 @@ function Dashboard() {
   return (
     <div className="main-container dashboard-container" dir="rtl">
       <div className="dashboard-header">
-        <h2>שלום, {user?.name}</h2>
+        <div className="profile-block">
+          <AvatarUpload />
+          <h2>שלום, {user?.name}</h2>
+        </div>
         <button type="button" className="btn btn-secondary" onClick={handleLogout}>
           התנתקות
         </button>

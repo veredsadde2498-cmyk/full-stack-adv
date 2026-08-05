@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
+const path = require('path');
 require('dotenv').config();
 
 const logger = require('./middleware/logger');
@@ -39,6 +40,18 @@ const transactionRoutes = require('./routes/transactionRoutes');
 // שימוש בראוטרים - כל פנייה ל- localhost:5000/api/... תגיע לראוטר המתאים
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
+
+// מגיש את קבצי התמונות שהועלו (תמונות פרופיל) - סטטית, בלי authLimiter/apiLimiter
+// כי זה לא /api ולא endpoint לוגי, רק הגשת קבצים.
+// crossOriginResourcePolicy: 'cross-origin' דורס כאן, רק על ה-route הזה, את
+// ברירת המחדל המחמירה של helmet() הגלובלי (same-origin) - בלעדיו הדפדפן חוסם
+// טעינת <img> מ-localhost:5000 כשהעמוד עצמו רץ על localhost:5173 (origin שונה).
+// שאר ה-API (למשל תשובות JSON) נשאר עם ההגנה המחמירה כרגיל - זה ספציפי לתמונות בלבד
+app.use(
+    '/uploads',
+    helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }),
+    express.static(path.join(__dirname, 'uploads'))
+);
 
 
 // נתיב בדיקה קצר בדפדפן

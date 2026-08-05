@@ -36,7 +36,8 @@ const register = async (req, res, next) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                avatarUrl: user.avatarUrl
             }
         });
     } catch (error) {
@@ -77,7 +78,8 @@ const login = async (req, res, next) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                avatarUrl: user.avatarUrl
             }
         });
     } catch (error) {
@@ -131,7 +133,8 @@ const googleLogin = async (req, res, next) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                avatarUrl: user.avatarUrl
             }
         });
     } catch (error) {
@@ -150,7 +153,42 @@ const getMe = async (req, res, next) => {
                 id: req.user._id,
                 name: req.user.name,
                 email: req.user.email,
-                role: req.user.role
+                role: req.user.role,
+                avatarUrl: req.user.avatarUrl
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// מעדכן את תמונת הפרופיל - req.file מגיע מ-middleware/upload.js (Multer),
+// owner נלקח מ-req.user (לא מה-body) מאותה סיבה שתמיד: לקוח לא אמור להיות
+// יכול לעדכן תמונה של משתמש אחר
+const uploadAvatar = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            const error = new Error('לא נבחר קובץ');
+            error.statusCode = 400;
+            return next(error);
+        }
+
+        const avatarUrl = `/uploads/${req.file.filename}`;
+
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { avatarUrl },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                avatarUrl: user.avatarUrl
             }
         });
     } catch (error) {
@@ -162,5 +200,6 @@ module.exports = {
     register,
     login,
     googleLogin,
-    getMe
+    getMe,
+    uploadAvatar
 };
