@@ -15,10 +15,11 @@ const createTransaction = async (req, res, next) => {
     }
 };
 
-// שליפת כל הטרנזקציות של המשתמש המחובר בלבד
+// שליפת כל הטרנזקציות של המשתמש המחובר בלבד, מהחדש לישן לפי תאריך התנועה
+// (date, לא createdAt - מתי היא קרתה בפועל, לא מתי היא הוזנה למערכת)
 const getAllTransactions = async (req, res, next) => {
     try {
-        const transactions = await Transaction.find({ owner: req.user.id });
+        const transactions = await Transaction.find({ owner: req.user.id }).sort({ date: -1 });
         res.status(200).json(transactions);
     } catch (error) {
         next(error);

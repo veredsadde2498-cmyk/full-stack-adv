@@ -14,6 +14,15 @@ export const fetchTransactions = createAsyncThunk(
 // השגיאה האמיתי מהשרת (message/errors) לקומפוננטה שקוראת להם עם
 // .unwrap() - בלי זה היינו מקבלים רק הודעת שגיאה גנרית של axios
 
+// כשאין תשובת HTTP בכלל (השרת למטה, בעיית רשת, CORS) - error.response הוא
+// undefined, ולכן גם error.response?.data. קריטי לא להעביר undefined ל-
+// rejectWithValue: Redux Toolkit קובע meta.rejectedWithValue לפי !!payload -
+// כלומר payload=undefined "נחשב" כאילו rejectWithValue בכלל לא נקרא, ואז
+// unwrap() זורק את action.error במקום, ש-RTK ממלא במחרוזת הקבועה שלו "Rejected"
+// (ראו rejected: error || "Rejected" במקור של createAsyncThunk). זו הסיבה
+// שהופיע "Rejected" גולמי בטופס במקום הודעה אמיתית - לא קשור ל-Joi/לשרת בכלל.
+const networkErrorPayload = { message: 'שגיאת תקשורת עם השרת, בדקי את החיבור ונסי שוב' }
+
 export const createTransaction = createAsyncThunk(
   'transactions/createTransaction',
   async (transactionData, { rejectWithValue }) => {
@@ -21,7 +30,7 @@ export const createTransaction = createAsyncThunk(
       const response = await api.post('/transactions', transactionData)
       return response.data
     } catch (error) {
-      return rejectWithValue(error.response?.data)
+      return rejectWithValue(error.response?.data || networkErrorPayload)
     }
   }
 )
@@ -33,7 +42,7 @@ export const updateTransaction = createAsyncThunk(
       const response = await api.put(`/transactions/${id}`, data)
       return response.data
     } catch (error) {
-      return rejectWithValue(error.response?.data)
+      return rejectWithValue(error.response?.data || networkErrorPayload)
     }
   }
 )
@@ -45,7 +54,7 @@ export const deleteTransaction = createAsyncThunk(
       await api.delete(`/transactions/${id}`)
       return id
     } catch (error) {
-      return rejectWithValue(error.response?.data)
+      return rejectWithValue(error.response?.data || networkErrorPayload)
     }
   }
 )

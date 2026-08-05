@@ -64,6 +64,9 @@ function TransactionForm() {
     if (!formData.type) return 'יש לבחור סוג תנועה'
     if (!formData.category.trim()) return 'קטגוריה היא שדה חובה'
     if (formData.category.trim().length < 2) return 'קטגוריה חייבת להכיל לפחות 2 תווים'
+    // השוואת מחרוזות עובדת נכון כאן כי שתי הצדדים בפורמט YYYY-MM-DD -
+    // השוואה לקסיקוגרפית על הפורמט הזה שקולה להשוואה כרונולוגית
+    if (formData.date > todayIsoDate()) return 'לא ניתן להזין תאריך עתידי'
     return ''
   }
 
