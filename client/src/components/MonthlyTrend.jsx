@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { getMonthlyStats, calculatePercentChange } from '../utils/monthlyStats'
 
 // שורת שינוי אחוזי לשדה אחד (הכנסות/הוצאות), עם חץ וצבע לפי אם השינוי
@@ -26,7 +27,9 @@ function ChangeRow({ label, change, metric }) {
 }
 
 function MonthlyTrend({ transactions }) {
-  const months = getMonthlyStats(transactions)
+  // useMemo - לא מחשבים מחדש את פילוח שלושת החודשים בכל render, רק
+  // כש-transactions באמת משתנה (למשל אחרי fetch/create/delete מ-Redux)
+  const months = useMemo(() => getMonthlyStats(transactions), [transactions])
   const previous = months[1]
   const current = months[2]
 

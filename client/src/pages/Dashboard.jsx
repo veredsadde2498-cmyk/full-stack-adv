@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAuth } from '../context/AuthContext'
 import { fetchTransactions, deleteTransaction } from '../store/transactionsSlice'
 import MonthlyTrend from '../components/MonthlyTrend'
 import AvatarUpload from '../components/AvatarUpload'
+import TransactionRow from '../components/TransactionRow'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -35,7 +36,9 @@ function Dashboard() {
     exportTransactionsToPdf(list)
   }
 
-  const handleDelete = async (id) => {
+  // useCallback עם [dispatch] בלבד (יציב) - כדי ש-TransactionRow הממומה
+  // תקבל את אותו reference בכל render ולא תתרנדר מחדש בגלל זה בלבד
+  const handleDelete = useCallback(async (id) => {
     if (!window.confirm('למחוק את הטרנזקציה הזו? לא ניתן לשחזר.')) return
 
     setDeleteError('')
@@ -44,17 +47,20 @@ function Dashboard() {
     } catch (err) {
       setDeleteError(err?.message || 'מחיקת הטרנזקציה נכשלה')
     }
-  }
+  }, [dispatch])
 
-  // מחשבים סיכומים מתוך ה-list שכבר קיים ב-Redux - בלי endpoint נפרד לזה
-  const totals = list.reduce(
-    (acc, t) => {
-      if (t.type === 'income') acc.income += t.amount
-      else acc.expense += t.amount
-      return acc
-    },
-    { income: 0, expense: 0 }
-  )
+  // מחשבים סיכומים מתוך ה-list שכבר קיים ב-Redux - בלי endpoint נפרד לזה.
+  // useMemo כדי לא לחשב reduce על כל הרשימה מחדש בכל render, רק כש-list משתנה
+  const totals = useMemo(() => {
+    return list.reduce(
+      (acc, t) => {
+        if (t.type === 'income') acc.income += t.amount
+        else acc.expense += t.amount
+        return acc
+      },
+      { income: 0, expense: 0 }
+    )
+  }, [list])
   const balance = totals.income - totals.expense
 
   return (
@@ -128,23 +134,7 @@ function Dashboard() {
               </thead>
               <tbody>
                 {list.map((t) => (
-                  <tr key={t._id}>
-                    <td>{t.title}</td>
-                    <td>{t.amount.toLocaleString()} ₪</td>
-                    <td>{t.type === 'income' ? 'הכנסה' : 'הוצאה'}</td>
-                    <td>{t.category}</td>
-                    <td>{new Date(t.date).toLocaleDateString('he-IL')}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                        <Link to={`/transactions/${t._id}/edit`} className="btn btn-primary">
-                          עריכה
-                        </Link>
-                        <button type="button" className="btn btn-danger" onClick={() => handleDelete(t._id)}>
-                          מחיקה
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                  <TransactionRow key={t._id} transaction={t} onDelete={handleDelete} />
                 ))}
               </tbody>
             </table>
