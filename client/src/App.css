@@ -107,6 +107,26 @@ button[type="submit"]:hover {
   margin: 0;
 }
 
+/* טופס עריכת שם - "שלום," + input + כפתור שמירה, בשורה אחת */
+.name-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.name-edit-form input {
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.name-edit-form input:focus {
+  border-color: #007bff;
+}
+
 .summary-cards {
   display: flex;
   gap: 15px;

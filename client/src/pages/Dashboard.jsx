@@ -4,12 +4,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useAuth } from '../context/AuthContext'
 import { fetchTransactions, deleteTransaction } from '../store/transactionsSlice'
 import MonthlyTrend from '../components/MonthlyTrend'
-import AvatarUpload from '../components/AvatarUpload'
+import EditProfile from '../components/EditProfile'
 import TransactionRow from '../components/TransactionRow'
 
 function Dashboard() {
   const navigate = useNavigate()
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const dispatch = useDispatch()
   const { list, loading, error } = useSelector((state) => state.transactions)
   const [deleteError, setDeleteError] = useState('')
@@ -66,10 +66,7 @@ function Dashboard() {
   return (
     <div className="main-container dashboard-container" dir="rtl">
       <div className="dashboard-header">
-        <div className="profile-block">
-          <AvatarUpload />
-          <h2>שלום, {user?.name}</h2>
-        </div>
+        <EditProfile />
         <button type="button" className="btn btn-secondary" onClick={handleLogout}>
           התנתקות
         </button>

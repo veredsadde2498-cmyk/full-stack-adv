@@ -196,10 +196,47 @@ const uploadAvatar = async (req, res, next) => {
     }
 };
 
+// מעדכן את השם בלבד - עובד זהה למשתמש שנרשם רגיל או דרך Google (owner
+// תמיד מ-req.user, לא מה-body). לא נוגעים באימייל בכלל - לא מתקבל ולא נשמר
+const updateProfile = async (req, res, next) => {
+    try {
+        const name = req.body.name?.trim();
+
+        if (!name) {
+            const error = new Error('שם הוא שדה חובה');
+            error.statusCode = 400;
+            return next(error);
+        }
+
+        // runValidators - כדי ש-maxlength:50 מהסכמה ייאכף גם ב-update, לא
+        // רק ב-create (Mongoose לא מריץ ולידציה על findByIdAndUpdate כברירת מחדל)
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { name },
+            { new: true, runValidators: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                avatarUrl: user.avatarUrl
+            }
+        });
+    } catch (error) {
+        error.statusCode = error.statusCode || 400; // כנראה שגיאת ולידציה של Mongoose
+        next(error);
+    }
+};
+
 module.exports = {
     register,
     login,
     googleLogin,
     getMe,
-    uploadAvatar
+    uploadAvatar,
+    updateProfile
 };
