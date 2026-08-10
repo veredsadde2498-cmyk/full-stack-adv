@@ -115,11 +115,11 @@ _(להוסיף צילומי מסך של הממשק — דף התחברות, דש
 
 | שם | תפקיד |
 |---|---|
-| _(להשלים)_ | Full Stack Development |
+| ורד שדה | Full Stack Development |
+
 
 ## קישור לפריסה חיה
 
-_(להשלים לאחר Deployment — שלב 12)_
+- Frontend: https://full-stack-adv.vercel.app
+- Backend: https://vefinance-server.onrender.com
 
-- Frontend:
-- Backend:
