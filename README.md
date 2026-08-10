@@ -1,125 +1,180 @@
 # Vefinance
 
-אפליקציית ניהול הכנסות והוצאות אישית — Full Stack (React + Node.js + MongoDB), פרויקט גמר בקורס Full Stack למתקדמים.
+Personal income & expense tracker — Full Stack app (React + Node.js + MongoDB), final project for an Advanced Full Stack course.
 
-Vefinance מאפשרת למשתמש להירשם ולהתחבר (כולל Google Sign-In), לנהל את הטרנזקציות הפיננסיות שלו (הכנסות/הוצאות), לצפות בסיכומים ובמגמות חודשיות, לייצא דוח PDF, ולהעלות תמונת פרופיל — הכל בממשק מאובטח ומוגן לפי משתמש.
+Vefinance lets a user register and log in (including Google Sign-In), manage their financial transactions (income/expenses), view real-time summaries and monthly trends, export a PDF report, and upload a profile picture — all in a secure, per-user-protected interface.
 
-## תכונות עיקריות
+## Key Features
 
-- הרשמה והתחברות עם אימייל/סיסמה (bcrypt + JWT)
-- התחברות עם Google (Google OAuth), בנוסף להתחברות הרגילה
-- ניהול טרנזקציות מלא (CRUD): יצירה, צפייה, עריכה, מחיקה
-- דשבורד עם סיכומי הכנסות/הוצאות/יתרה בזמן אמת
-- השוואת מגמה של 3 חודשים אחרונים (הכנסות/הוצאות, אחוזי שינוי)
-- ייצוא סיכום פיננסי כקובץ PDF (כולל תמיכה בעברית)
-- העלאת ועריכת תמונת פרופיל ושם משתמש
-- הגנת נתונים לפי משתמש (כל משתמש רואה רק את הטרנזקציות שלו)
-- Rate limiting והגנות אבטחה (Helmet, בדיקות קלט עם Joi)
-- טעינה עצלה (lazy loading) ואופטימיזציית ביצועים (memoization)
+- Email/password registration and login (bcrypt + JWT)
+- Google Sign-In, in addition to regular email/password login
+- Full transaction management (CRUD): create, view, edit, delete
+- Dashboard with real-time income/expense/balance summaries
+- 3-month trend comparison (income/expenses, percent change)
+- Export a financial summary as a PDF (with proper Hebrew support)
+- Upload and edit profile picture and username
+- Per-user data isolation (each user only sees their own transactions)
+- Rate limiting and security hardening (Helmet, Joi input validation)
+- Lazy loading and performance optimization (memoization)
 
 ## Tech Stack
 
 **Backend:**
 - Node.js + Express 5
 - MongoDB + Mongoose
-- JWT (jsonwebtoken) + bcryptjs — אימות והצפנת סיסמאות
-- google-auth-library — אימות Google Sign-In
-- Joi — ולידציית קלט
-- Multer — העלאת קבצים
-- Helmet, express-rate-limit — אבטחה
+- JWT (jsonwebtoken) + bcryptjs — authentication and password hashing
+- google-auth-library — Google Sign-In verification
+- Joi — input validation
+- Multer — file uploads
+- Helmet, express-rate-limit — security
 
 **Frontend:**
 - React 19 + Vite
-- React Router — ניווט
-- Redux Toolkit + React Redux — ניהול state לטרנזקציות
-- Context API — ניהול session/אימות משתמש
-- Axios — תקשורת עם ה-API
+- React Router — navigation
+- Redux Toolkit + React Redux — transaction state management
+- Context API — session/auth state management
+- Axios — API communication
 - Tailwind CSS
-- @react-oauth/google — כפתור Google Sign-In
-- jsPDF + jspdf-autotable — ייצוא PDF
+- @react-oauth/google — Google Sign-In button
+- jsPDF + jspdf-autotable — PDF export
 
-## התקנה והרצה מקומית
+## Architecture and Folder Structure
 
-### דרישות מקדימות
-- Node.js (גרסה 18 ומעלה)
-- MongoDB רץ מקומית (mongodb://localhost:27017) או חיבור ל-MongoDB Atlas
+Vefinance uses a client–server architecture. The React single-page application calls a REST API over Axios. The Express API applies validation (Joi), authentication (JWT), and ownership authorization, then persists data in MongoDB through Mongoose models. Uploaded profile pictures are stored on the server's filesystem and served statically; their path is stored in MongoDB.
 
-### שלבים
+```
+.
+├── client/
+│   ├── src/
+│   │   ├── components/       # Reusable UI (AvatarUpload, EditProfile, TransactionRow, MonthlyTrend, PrivateRoute)
+│   │   ├── context/          # AuthContext — user session, login/logout
+│   │   ├── pages/            # Login, Register, Dashboard, TransactionForm, NotFound
+│   │   ├── services/         # api.js — axios instance with JWT interceptor
+│   │   ├── store/            # Redux store + transactionsSlice
+│   │   ├── utils/            # monthlyStats.js, exportPdf.js
+│   │   ├── App.jsx           # Routes, lazy-loaded pages
+│   │   └── main.jsx          # Providers (Redux + Auth) and entry point
+│   └── vite.config.js
+├── server/
+│   ├── controllers/           # authController, transactionController
+│   ├── middleware/            # authMiddleware (protect), validate, upload (Multer), errorHandler, logger, rateLimiter
+│   ├── models/                # User, Transaction (Mongoose schemas)
+│   ├── routes/                # authRoutes, transactionRoutes
+│   ├── validation/            # Joi schemas
+│   ├── uploads/                # Uploaded profile pictures (not committed)
+│   └── server.js               # Express app, MongoDB connection, server startup
+└── README.md
+```
 
-1. שכפול הפרויקט
+## MongoDB Schema and Collection Relationships
+
+```
+flowchart LR
+    U[User]
+    T[Transaction]
+
+    T -->|owner| U
+```
+
+| Model | Default collection | References |
+|---|---|---|
+| `User` | `users` | Standalone. Stores `name`, `email` (unique), `password` (bcrypt-hashed via pre-save hook, excluded from queries by default via `select:false`), `role`, `avatarUrl`. |
+| `Transaction` | `transactions` | `owner` references the creating `User` (`ObjectId`, required). Every query is filtered by `owner` to enforce per-user data isolation. |
+
+Every model uses Mongoose `timestamps`, adding `createdAt`/`updatedAt` automatically. Transactions are always sorted by their business `date` field (newest first) — not by `createdAt` — since a transaction's business date can differ from when it was entered into the system.
+
+## Local Setup
+
+### Prerequisites
+- Node.js (version 18 or higher)
+- MongoDB running locally (`mongodb://localhost:27017`) or a MongoDB Atlas connection
+
+### Steps
+
+1. **Clone the repository**
+   ```bash
    git clone https://github.com/veredsadde2498-cmyk/full-stack-adv.git
    cd full-stack-adv
+   ```
 
-2. התקנת צד שרת
+2. **Install server dependencies**
+   ```bash
    cd server
    npm install
-
-   ליצור קובץ .env בתיקיית server/ (לפי הדוגמה ב-.env.example):
+   ```
+   Create a `.env` file in `server/` (see `.env.example`):
+   ```
    PORT=5000
    DATABASE_URL=mongodb://localhost:27017/vefinance
-   JWT_SECRET=<מחרוזת סוד אקראית, לפחות 32 תווים>
+   JWT_SECRET=<random secret string, at least 32 characters>
    JWT_EXPIRES_IN=7d
-   GOOGLE_CLIENT_ID=<Client ID מ-Google Cloud Console>
+   GOOGLE_CLIENT_ID=<Client ID from Google Cloud Console>
+   ```
 
-3. התקנת צד לקוח
+3. **Install client dependencies**
+   ```bash
    cd ../client
    npm install
-
-   ליצור קובץ .env בתיקיית client/ (לפי הדוגמה ב-.env.example):
+   ```
+   Create a `.env` file in `client/` (see `.env.example`):
+   ```
    VITE_API_URL=http://localhost:5000/api
-   VITE_GOOGLE_CLIENT_ID=<אותו Client ID כמו בצד השרת>
+   VITE_GOOGLE_CLIENT_ID=<same Client ID as the server>
+   ```
 
-4. הרצה (בשני טרמינלים נפרדים)
-   # טרמינל 1 — שרת
+4. **Run** (in two separate terminals)
+   ```bash
+   # Terminal 1 — server
    cd server
    npm run dev
 
-   # טרמינל 2 — לקוח
+   # Terminal 2 — client
    cd client
    npm run dev
+   ```
 
-5. לפתוח בדפדפן: http://localhost:5173
+5. Open in browser: `http://localhost:5173`
 
-## טבלת API Endpoints
+## API Endpoints
 
-### Auth (/api/auth)
+### Auth (`/api/auth`)
 
-| Method | Endpoint | תיאור | הרשאה |
+| Method | Endpoint | Description | Access |
 |---|---|---|---|
-| POST | /api/auth/register | הרשמת משתמש חדש | ציבורי |
-| POST | /api/auth/login | התחברות עם אימייל/סיסמה | ציבורי |
-| POST | /api/auth/google | התחברות/הרשמה עם Google | ציבורי |
-| GET | /api/auth/me | פרטי המשתמש המחובר | מוגן |
-| PUT | /api/auth/profile | עדכון שם משתמש | מוגן |
-| PUT | /api/auth/avatar | העלאת תמונת פרופיל | מוגן |
+| POST | `/api/auth/register` | Register a new user | Public |
+| POST | `/api/auth/login` | Log in with email/password | Public |
+| POST | `/api/auth/google` | Log in/register with Google | Public |
+| GET | `/api/auth/me` | Current logged-in user's details | Protected |
+| PUT | `/api/auth/profile` | Update username | Protected |
+| PUT | `/api/auth/avatar` | Upload profile picture | Protected |
 
-### Transactions (/api/transactions)
+### Transactions (`/api/transactions`)
 
-| Method | Endpoint | תיאור | הרשאה |
+| Method | Endpoint | Description | Access |
 |---|---|---|---|
-| POST | /api/transactions | יצירת טרנזקציה חדשה | מוגן |
-| GET | /api/transactions | כל הטרנזקציות של המשתמש המחובר (ממוין לפי תאריך) | מוגן |
-| GET | /api/transactions/:id | טרנזקציה בודדת | מוגן |
-| PUT | /api/transactions/:id | עדכון טרנזקציה | מוגן |
-| DELETE | /api/transactions/:id | מחיקת טרנזקציה | מוגן |
+| POST | `/api/transactions` | Create a new transaction | Protected |
+| GET | `/api/transactions` | All transactions for the current user (sorted by date) | Protected |
+| GET | `/api/transactions/:id` | Single transaction | Protected |
+| PUT | `/api/transactions/:id` | Update a transaction | Protected |
+| DELETE | `/api/transactions/:id` | Delete a transaction | Protected |
 
-כל ה-endpoints המוגנים דורשים header: Authorization: Bearer <token>.
+All protected endpoints require the header: `Authorization: Bearer <token>`.
 
 ## Screenshots
 
-_(להוסיף צילומי מסך של הממשק — דף התחברות, דשבורד, טופס טרנזקציה — לפני ההגשה הסופית)_
+_(Add UI screenshots — login page, dashboard, transaction form — before final submission)_
 
 ## Team
 
-פרויקט יחיד.
+Solo project.
 
-| שם | תפקיד |
+| Name | Role |
 |---|---|
-| ורד שדה | Full Stack Development |
+| Vered Sade | Full Stack Development |
 
+## Live Deployment
 
-## קישור לפריסה חיה
+- Frontend (Vercel): https://full-stack-adv.vercel.app
+- Backend (Render): https://vefinance-server.onrender.com
 
-- Frontend: https://full-stack-adv.vercel.app
-- Backend: https://vefinance-server.onrender.com
 
