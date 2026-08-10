@@ -68,7 +68,7 @@ Vefinance uses a client–server architecture. The React single-page application
 
 ## MongoDB Schema and Collection Relationships
 
-```
+```mermaid
 flowchart LR
     U[User]
     T[Transaction]
