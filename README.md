@@ -180,7 +180,8 @@ Real-time income/expense/balance summaries, a 3-month trend comparison, and the 
 
 **New Transaction**
 
-<img width="198" height="395" alt="image" src="https://github.com/user-attachments/assets/e24ffcfb-c296-4170-a7b6-eac9fa00d1ae" />
+<img width="193" height="391" alt="image" src="https://github.com/user-attachments/assets/4d06b368-66ba-46df-8074-93aae8945400" />
+
 
 Form for creating or editing a transaction, with client-side validation.
 
