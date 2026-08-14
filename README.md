@@ -163,11 +163,13 @@ All protected endpoints require the header: `Authorization: Bearer <token>`.
 ## Screenshots
 
 Below are a few screenshots of Vefinance in action, taken from the live deployment.
+
 **Login** 
 
 <img width="204" height="324" alt="image" src="https://github.com/user-attachments/assets/49f73d3f-5f44-4ab8-b2d8-a5c0c6dde843" />
 
 email/password sign-in, with Google Sign-In as an alternative option.
+
 
 **Dashboard**
 
@@ -175,15 +177,21 @@ email/password sign-in, with Google Sign-In as an alternative option.
 
 Real-time income/expense/balance summaries, a 3-month trend comparison, and the full transaction list.
 
+
 **New Transaction**
 
 <img width="198" height="395" alt="image" src="https://github.com/user-attachments/assets/e24ffcfb-c296-4170-a7b6-eac9fa00d1ae" />
 
 Form for creating or editing a transaction, with client-side validation.
 
+
 **404 Page**
 
 <img width="169" height="112" alt="image" src="https://github.com/user-attachments/assets/e50c1ee8-b0bd-4a82-b97a-903c362c5003" />
+
+A friendly error page for undefined routes, with a link back to the app.
+
+
 
 **PDF Export**
 
